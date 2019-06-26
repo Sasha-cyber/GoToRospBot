@@ -1,6 +1,7 @@
 import telebot
 import time
 import datetime
+import random
 from threading import Thread
 now = datetime.datetime.now()    
     
@@ -30,8 +31,11 @@ def sender():
         print(current_time)
         for user in users:
             for event_time, event in timetable:
+                print(event_time, current_time)
                 if event_time == current_time:
-                    bot.send_message(user, event)
+                    bot.send_message(user, "Наступает событие: {}!".format(event))
+                    s = ['CAADAgADjgADEyscBFeorVcqn4_hAg', 'CAADAgADhQADEyscBLji2-mncNu6Ag', 'CAADAgADnAADEyscBAmmHWlOokzmAg', 'CAADAgADlQADEyscBCJrPko1HxqnAg', 'CAADAgADngADEyscBDHY4Sshc4VGAg', 'CAADAgADpgADEyscBH4_c_4faUwVAg']
+                    bot.send_sticker(user,random.choice(s))
         
         if time.time() - last_save > 60 * 60 * 24:
             timetable = []
@@ -48,12 +52,13 @@ def rosp(message):
     if "расписание" in b:
         timetable = []
         lines = message.text.split('\n')
+        last_save = time.time()
         for line in lines:
             if line[:2].isdigit():
                 event_time = line[:5]
                 name = line[6:] 
                 timetable.append((event_time, name))
-        last_save = time.time()
+        
         print(timetable)        
 
 def polling():
