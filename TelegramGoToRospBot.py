@@ -64,6 +64,7 @@ def rosp(message):
         users.append(message.chat.id)
     b = message.text.lower()
     if "расписание" in b:
+        bot.send_message(message.chat.id, "Zapomnil...")
         timetable = []
         lines = message.text.split('\n')
         last_save = time.time()
