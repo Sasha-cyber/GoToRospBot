@@ -62,7 +62,7 @@ def rosp(message):
     global timetable
     if message.chat.id not in users:
         users.append(message.chat.id)
-        b = message.text.lower()
+    b = message.text.lower()
     if "расписание" in b:
         timetable = []
         lines = message.text.split('\n')
