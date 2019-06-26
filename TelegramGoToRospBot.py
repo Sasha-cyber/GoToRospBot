@@ -28,10 +28,10 @@ def save():
         file.write(data)
 
 def load():
-    with open('data.json', 'r') as file:
-        try:
+    try:
+        with open('data.json', 'r') as file:
             timetable, users, last_save = json.loads(file.read())
-        except:
+    except:
             save()
 load()
 
