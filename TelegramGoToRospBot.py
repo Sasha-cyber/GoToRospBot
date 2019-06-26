@@ -22,6 +22,19 @@ timetable = []
 users = []
 last_save = 0
 
+def save():
+    with open('data.json', 'w') as file:
+        data = json.dumps([timetable, users, last_save])
+        file.write(data)
+
+def load():
+    with open('data.json', 'r') as file:
+        try:
+            timetable, users, last_save = json.loads(file.read())
+        except:
+            save()
+load()
+
 def sender():
     global timetable
     while True:
@@ -58,7 +71,7 @@ def rosp(message):
                 event_time = line[:5]
                 name = line[6:] 
                 timetable.append((event_time, name))
-        
+        save()
         print(timetable)        
 
 def polling():
