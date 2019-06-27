@@ -6,79 +6,66 @@ from threading import Thread
 import json
 now = datetime.datetime.now()    
     
-token = "733795990:AAH2i-rEl1CEnCoNnryQrAU2EPlhYJ0dtxQ"
+token = "864457409:AAFFnm9ORq-5akxuxpAIlC1mCQ6I6attVaY"
 telebot.apihelper.proxy = {'https': 'socks5h://geek:socks@t.geekclass.ru:7777'}
 
 bot = telebot.TeleBot(token=token)
-groups = []
-"""
-@bot.message_handler(content_type=['text'])
-def groupc(message):
-    group =  message.chat.id
-    if group not in groups:
-        rosp(message)
-# TODO: запоминать расписание для каждого из чатов по отдельности
-"""
-timetable = []
-users = []
-last_save = 0
+
+users = {}  # id <=> timetable
+#users[user] = timetable
+last_save = {}
 
 def save():
     with open('data.json', 'w') as file:
-        data = json.dumps([timetable, users, last_save])
+        data = json.dumps([users, last_save])
         file.write(data)
 
 def load():
     try:
         with open('data.json', 'r') as file:
-            timetable, users, last_save = json.loads(file.read())
+            users, last_save = json.loads(file.read())
     except:
             save()
 load()
 
 def sender():
-    global timetable
+    global users
     while True:
-        # TODO: узнать текущее время в формате HH:MM
         now = datetime.datetime.now()
         current_time = now.strftime("%H:%M")
         print(current_time)
         for user in users:
-            for event_time, event in timetable:
+            for event_time, event in users[user]:
                 print(event_time, current_time)
                 if event_time == current_time:
                     bot.send_message(user, "Наступает событие: {}!".format(event))
                     s = ['CAADAgADjgADEyscBFeorVcqn4_hAg', 'CAADAgADhQADEyscBLji2-mncNu6Ag', 'CAADAgADnAADEyscBAmmHWlOokzmAg', 'CAADAgADlQADEyscBCJrPko1HxqnAg', 'CAADAgADngADEyscBDHY4Sshc4VGAg', 'CAADAgADpgADEyscBH4_c_4faUwVAg']
-                    bot.send_sticker(user,random.choice(s))
-        
-        if time.time() - last_save > 60 * 60 * 24:
-            timetable = []
+                    bot.send_sticker(user, random.choice(s))
+
+            if time.time() - last_save[user] > 60 * 60 * 24:
+                users[user] = []
 
         time.sleep(60)
 
         
 @bot.message_handler(content_types=['text'])
 def rosp(message):
-    global timetable
-    if message.chat.id not in users:
-        users.append(message.chat.id)
+    global users
     b = message.text.lower()
     if "расписание" in b:
         bot.send_message(message.chat.id, "Zapomnil...")
-        timetable = []
+        users[message.chat.id] = []
         lines = message.text.split('\n')
-        last_save = time.time()
+        last_save[message.chat.id] = time.time()
         for line in lines:
             if line[:2].isdigit():
                 event_time = line[:5]
                 name = line[6:] 
-                timetable.append((event_time, name))
+                users[message.chat.id].append((event_time, name))
         save()
-        print(timetable)        
 
 def polling():
     bot.polling(none_stop=True) 
-# TODO: запустить сендер в отдельном потоке
 polling_thread = Thread(target=polling)
 sender_thread = Thread(target=sender)
 
